@@ -1,0 +1,15 @@
+{
+  "name": "almondplus-api",
+  "version": "0.1.0",
+  "description": "Almond Plus API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Isaac Gifford <isaac@geekingreen.com>",
+  "license": "MIT",
+  "dependencies": {
+    "websocket": "^1.0.22"
+  }
+}
