@@ -28,7 +28,7 @@ const SQL_CREATE_DBINFO = `
 `;
 const SQL_CREATE_CLIENTS = `
     CREATE TABLE IF NOT EXISTS ${TABLE_CLIENTS}
-    (${FIELD_CLIENTS_ID} TEXT, ${FIELD_CLIENTS_SECRET} TEXT, ${FIELD_CLIENTS_NAME} TEXT)
+    (${FIELD_CLIENTS_ID} TEXT, ${FIELD_CLIENTS_SECRET} TEXT, ${FIELD_CLIENTS_NAME} TEXT UNIQUE)
 `;
 const SQL_CREATE_USERS = `
     CREATE TABLE IF NOT EXISTS ${TABLE_USERS}
@@ -47,6 +47,13 @@ const SQL_INSERT_CLIENT = `
     INSERT OR IGNORE INTO ${TABLE_CLIENTS}
     (${FIELD_CLIENTS_ID}, ${FIELD_CLIENTS_SECRET}, ${FIELD_CLIENTS_NAME})
     VALUES (?, ?, ?)
+`;
+const SQL_UPDATE_CLIENT = `
+    UPDATE ${TABLE_CLIENTS}
+    SET
+    ${FIELD_CLIENTS_ID} = ?,
+    ${FIELD_CLIENTS_SECRET} = ?
+    WHERE ${FIELD_CLIENTS_NAME} = ?
 `;
 const SQL_INSERT_USER = `
     INSERT OR IGNORE INTO ${TABLE_USERS}
@@ -104,7 +111,7 @@ module.exports = function (config) {
         db.run(SQL_CREATE_TOKENS);
         db.run(SQL_INSERT_DBINFO, 1, 1);
         if (config.users) {
-            config.users.forEach((user, i) => {
+            config.users.forEach((user) => {
                 const username = user.username;
                 const password = user.password;
                 db.run(SQL_INSERT_USER, username, password);
@@ -112,7 +119,13 @@ module.exports = function (config) {
             });
         }
         if (config.clients) {
-            config.clients.forEach()
+            config.clients.forEach(client => {
+                const clientId = client.clientId;
+                const clientSecret = client.clientSecret;
+                const name = client.name;
+                db.run(SQL_INSERT_CLIENT, clientId, clientSecret, name);
+                db.run(SQL_UPDATE_CLIENT, clientId, clientSecret, name);
+            });
         }
     });
     return new Store(db);
