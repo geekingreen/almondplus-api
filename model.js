@@ -1,24 +1,33 @@
 'use strict';
-const db = require('./db')(require('./config'));
 
-module.exports = {
-    getAccessToken(bearerToken, cb) {
-        db.getAccessToken(bearerToken, cb);
-    },
+module.exports = function (db) {
+    return {
+        getAuthCode(authCode, cb) {
+            db.getAuthCode(authCode, cb);
+        },
 
-    getClient(clientId, clientSecret, cb) {
-        cb(null, { clientId: 'test' });
-    },
+        saveAuthCode(authCode, clientId, expires, user, cb) {
+            db.saveAuthCode(authCode, clientId, expires, user, cb);
+        },
 
-    grantTypeAllowed(clientId, grantType, cb) {
-        cb(null, grantType === 'password');
-    },
+        getAccessToken(bearerToken, cb) {
+            db.getAccessToken(bearerToken, cb);
+        },
 
-    saveAccessToken(accessToken, clientId, expires, user, cb) {
-        db.saveAccessToken(accessToken, clientId, expires, user, cb);
-    },
+        saveAccessToken(accessToken, clientId, expires, user, cb) {
+            db.saveAccessToken(accessToken, clientId, expires, user, cb);
+        },
 
-    getUser(username, password, cb) {
-        db.getUser(username, password, cb);
-    }
+        getClient(clientId, clientSecret, cb) {
+            db.getClient(clientId, cb);
+        },
+
+        grantTypeAllowed(clientId, grantType, cb) {
+            cb(null, grantType === 'password');
+        },
+
+        getUser(username, password, cb) {
+            db.getUser(username, password, cb);
+        }
+    };
 };
