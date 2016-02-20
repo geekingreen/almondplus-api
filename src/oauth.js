@@ -13,44 +13,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-app.oauth = oauthServer({
-    model: require('./model'),
-    grants: ['auth_code', 'password'],
-    debug: true
-});
-
-app.all('/oauth/token', app.oauth.grant());
-
-app.get('/oauth/authorise', function (req, res, next) {
-    if (!req.session.user) {
-        // If they aren't logged in, send them to your own login implementation
-        return res.redirect('/oauth/login?redirect=' + req.path + '&client_id=' +
-            req.query.client_id + '&redirect_uri=' + req.query.redirect_uri);
-    }
-
-    res.render('authorise', {
-        client_id: req.query.client_id,
-        redirect_uri: req.query.redirect_uri,
-        state: req.query.state
-    });
-});
-
-app.post('/oauth/authorise', function (req, res, next) {
-    if (!req.session.user) {
-        return res.redirect('/oauth/login?client_id=' + req.body.client_id +
-            '&redirect_uri=' + req.body.redirect_uri +
-            '&state=' + req.body.state);
-    }
-    next();
-}, app.oauth.authCodeGrant(function (req, next) {
-    // The first param should to indicate an error
-    // The second param should a bool to indicate if the user did authorise the app
-    // The third param should for the user/uid (only used for passing to saveAuthCode)
-    next(null, req.body.allow === 'yes', req.session.user.id, req.session.user);
-}));
 
 app.get('/oauth/login', (req, res) => {
     if (req.query.client_id) {
@@ -64,9 +29,14 @@ app.get('/oauth/login', (req, res) => {
         });
     }
 });
+
 app.post('/oauth/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
+    const client_id = req.body.client_id;
+    db.getClient(client_id, (err, client) => {
+        console.log(client);
+    });
     db.getUser(username, password, (err, user) => {
         if(err || !user) {
             res.render('login', {
@@ -77,16 +47,18 @@ app.post('/oauth/login', (req, res) => {
             });
         } else {
             req.session.user = user;
-            return res.redirect((req.body.redirect || '/oauth/authorise') + '?client_id=' +
-                req.body.client_id + '&redirect_uri=' + req.body.redirect_uri +
-                '&state=' + req.body.state);
+            return res.redirect(req.body.redirect_uri + '#state=' + req.body.state + '&access_token=testtoken&token_type=Bearer');
         }
     });
 });
-app.get('/', app.oauth.authorise(), (req, res) => {
+
+app.get('/oauth', (req, res, next) => {
+    const auth_token = req.query.auth_token;
+    db.getAccessToken(auth_token, (err, token) => {
+        console.log(token);
+    });
+}, (req, res) => {
     res.send('Secret area');
 });
-
-app.use(app.oauth.errorHandler());
 
 module.exports = app;
