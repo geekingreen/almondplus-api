@@ -1,6 +1,7 @@
 'use strict';
 const sqlite3 = require('sqlite3');
 const db = new sqlite3.Database('./oauth.db');
+const config = require('../config');
 
 const FIELD_ID = 'rowid';
 
@@ -124,6 +125,33 @@ const SQL_SAVE_AUTHCODE = `
     VALUES (?, ?, ?, ?)
 `;
 
+db.serialize(function() {
+    db.run(SQL_CREATE_DBINFO);
+    db.run(SQL_CREATE_CLIENTS);
+    db.run(SQL_CREATE_USERS);
+    db.run(SQL_CREATE_TOKENS);
+    db.run(SQL_CREATE_AUTHCODES);
+    db.run(SQL_INSERT_DBINFO, 1, 1);
+    if (config.users) {
+        config.users.forEach((user) => {
+            const username = user.username;
+            const password = user.password;
+            db.run(SQL_INSERT_USER, username, password);
+            db.run(SQL_UPDATE_USER, password, username);
+        });
+    }
+    if (config.clients) {
+        config.clients.forEach(client => {
+            const clientId = client.clientId;
+            const clientSecret = client.clientSecret;
+            const name = client.name;
+            const redirectUri = client.redirectUri;
+            db.run(SQL_INSERT_CLIENT, clientId, clientSecret, name, redirectUri);
+            db.run(SQL_UPDATE_CLIENT, clientId, clientSecret, redirectUri, name);
+        });
+    }
+});
+
 class Store {
     constructor(db) {
         this.db = db;
@@ -158,32 +186,4 @@ class Store {
     }
 }
 
-module.exports = function (config) {
-    db.serialize(function() {
-        db.run(SQL_CREATE_DBINFO);
-        db.run(SQL_CREATE_CLIENTS);
-        db.run(SQL_CREATE_USERS);
-        db.run(SQL_CREATE_TOKENS);
-        db.run(SQL_CREATE_AUTHCODES);
-        db.run(SQL_INSERT_DBINFO, 1, 1);
-        if (config.users) {
-            config.users.forEach((user) => {
-                const username = user.username;
-                const password = user.password;
-                db.run(SQL_INSERT_USER, username, password);
-                db.run(SQL_UPDATE_USER, password, username);
-            });
-        }
-        if (config.clients) {
-            config.clients.forEach(client => {
-                const clientId = client.clientId;
-                const clientSecret = client.clientSecret;
-                const name = client.name;
-                const redirectUri = client.redirectUri;
-                db.run(SQL_INSERT_CLIENT, clientId, clientSecret, name, redirectUri);
-                db.run(SQL_UPDATE_CLIENT, clientId, clientSecret, redirectUri, name);
-            });
-        }
-    });
-    return new Store(db);
-};
+module.exports = new Store(db);

@@ -1,5 +1,6 @@
 'use strict';
 const WebSocketClient = require('websocket').client;
+const config = require('../config');
 
 class Almond {
     constructor(config) {
@@ -77,5 +78,5 @@ class Almond {
     }
 };
 
-module.exports = Almond;
+module.exports = new Almond(config);
 
