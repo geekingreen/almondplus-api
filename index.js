@@ -2,7 +2,7 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const oauth = require('./src/oauth');
-const config = require('./config');
+const api = require('./src/api');
 const almond = require('./src/almond');
 
 const app = express();
@@ -10,7 +10,8 @@ const app = express();
 app.engine('.hbs', exphbs({ extname: '.hbs', defaultLayout: 'main' }));
 app.set('view engine', '.hbs');
 
-app.use(oauth);
+app.use('/oauth', oauth);
+app.use('/api', api);
 
 app.listen(3000);
 

@@ -15,7 +15,7 @@
     "express-handlebars": "^3.0.0",
     "express-session": "^1.13.0",
     "jsonfile": "^2.2.3",
-    "oauth2-server": "^2.4.1",
+    "moment": "^2.11.2",
     "shortid": "^2.2.4",
     "sqlite3": "^3.1.1",
     "websocket": "^1.0.22"

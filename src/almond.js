@@ -2,11 +2,26 @@
 const WebSocketClient = require('websocket').client;
 const config = require('../config');
 
+const CMD_DEVICE_LIST = 'devicelist';
+const CMD_CLIENT_LIST = 'ClientList';
+const CMD_SET_DEVICE_INDEX = 'setdeviceindex';
+const CMD_SENSOR_UPDATE = 'SensorUpdate';
+
+const SWITCH_BINARY = 'SWITCH BINARY';
+
+function getId() {
+    if (!getId.id || getId.id > 999) {
+        getId.id = 0;
+    }
+    return ++getId.id;
+}
+
 class Almond {
     constructor(config) {
         this.socket = new WebSocketClient();
         this.events = {};
         this.queue = [];
+        this.mii = {};
 
         this.socket.on('connect', this._handleConnect.bind(this));
         this.socket.on('connectFailed', this._handleError.bind(this));
@@ -41,6 +56,11 @@ class Almond {
     _handleMessage(message) {
         if (message.type === 'utf8') {
             const data = JSON.parse(message.utf8Data);
+            const mii = data.mii || data.MobileInternalIndex;
+            const p = this.mii[mii];
+            if (p) {
+                p.resolve(data);
+            }
             this._sendEvent('message', data);
         }
     }
@@ -53,7 +73,7 @@ class Almond {
     }
 
     on(eventName, fn) {
-        if (!this.events[eventName]) { this.events[eventName] = [] }
+        if (!this.events[eventName]) { this.events[eventName] = []; }
 
         if (this.events[eventName].indexOf(fn) === -1) {
             this.events[eventName].push(fn);
@@ -76,7 +96,14 @@ class Almond {
             this.queue.push(data);
         }
     }
+
+    sendAction(data) {
+        const mii = getId();
+        this.mii[mii] = Promise.defer();
+        data.mii = mii;
+        this.send(data);
+        return this.mii[mii].promise;
+    }
 };
 
 module.exports = new Almond(config);
-
