@@ -30,7 +30,7 @@ app.get('/login', (req, res) => {
             res.render('login', {
                 redirect: req.query.redirect,
                 client_id: req.query.client_id,
-                redirect_uri: req.query.redirect_uri || encodeURIComponent(client.redirectUri),
+                redirect_uri: req.query.redirect_uri || client.redirectUri,
                 state: req.query.state
             });
         });
@@ -55,8 +55,8 @@ app.post('/login', (req, res) => {
                 });
             } else {
                 const access_token = generateAccessToken();
-                db.saveAccessToken(generateAccessToken(), client_id, moment().add(30, 'days').unix(), user, () => {
-                    res.redirect(`${req.body.redirect_uri}#state=${req.body.state}&access_token=${access_token}&token_type=Bearer`);
+                db.saveAccessToken(access_token, client_id, moment().add(30, 'days').valueOf(), user, () => {
+                    res.redirect(req.body.redirect_uri + '#state=' + req.body.state + '&access_token=' + access_token + '&token_type=Bearer');
                 });
             }
         });

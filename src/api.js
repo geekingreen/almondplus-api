@@ -12,7 +12,7 @@ const verifyAccessToken = (req, res, next) => {
         if (err || !token) {
             return res.json({ message: 'Invalid token' });
         }
-        if ((token.expires * 1000) - moment().unix() > 0) {
+        if (parseInt(token.expires, 10) - moment().valueOf() > 0) {
             next();
         } else {
             res.json({ message: 'Access token expired' });
@@ -23,7 +23,10 @@ const verifyAccessToken = (req, res, next) => {
 app.use(verifyAccessToken);
 
 app.put('/switches', (req, res) => {
-    almond.sendAction({ cmd: 'setdeviceindex', devid: 1, index: 1, value: true }).then(data => res.json(data));
+    almond.sendAction({
+        deviceName: req.query.device_name || req.body.device_name,
+        action: req.query.action || req.body.action
+    }).then(data => res.json(data));
 });
 
 module.exports = app;

@@ -22,6 +22,7 @@ class Almond {
         this.events = {};
         this.queue = [];
         this.mii = {};
+        this.devices = {};
 
         this.socket.on('connect', this._handleConnect.bind(this));
         this.socket.on('connectFailed', this._handleError.bind(this));
@@ -53,15 +54,46 @@ class Almond {
         }
     }
 
+    _onDeviceList(devices) {
+        this.devices = devices;
+        Object.keys(devices).forEach(id => console.log(`Found device: ${devices[id].devicename}`));
+    }
+
+    _getDeviceByName(name) {
+        for (var id in this.devices) {
+            const device = this.devices[id];
+            if (device.devicename.toLowerCase() === name) {
+                return device;
+            }
+        }
+    }
+
+    _getSwitchValue(devicevalues) {
+        for (var id in devicevalues) {
+            const v = devicevalues[id];
+            if (v.name === SWITCH_BINARY) {
+                return v;
+            }
+        }
+    }
+
+    _resolvePromise(mii, data) {
+        const p = this.mii[mii];
+        if (p) {
+            p.resolve(data);
+            this.mii[mii] = null;
+        }
+    }
+
     _handleMessage(message) {
         if (message.type === 'utf8') {
             const data = JSON.parse(message.utf8Data);
             const mii = data.mii || data.MobileInternalIndex;
-            const p = this.mii[mii];
-            if (p) {
-                p.resolve(data);
-            }
             this._sendEvent('message', data);
+            if (data.commandtype === 'devicelist') {
+                this._onDeviceList(data.data);
+            }
+            this._resolvePromise(mii, data);
         }
     }
 
@@ -99,11 +131,26 @@ class Almond {
 
     sendAction(data) {
         const mii = getId();
+        const device = this._getDeviceByName(data.deviceName);
+        const value = this._getSwitchValue(device.devicevalues);
         this.mii[mii] = Promise.defer();
-        data.mii = mii;
-        this.send(data);
+        this.send({
+            mii: mii,
+            cmd: 'setdeviceindex',
+            devid: device.deviceid,
+            index: value.index,
+            value: data.action === 'on' ? true : false
+        });
         return this.mii[mii].promise;
     }
 };
 
-module.exports = new Almond(config);
+const almond = new Almond(config);
+
+almond.on('message', res => {
+});
+
+almond.send({ mii: 1, cmd: 'devicelist' });
+almond.send({ MobileInternalIndex: 1, CommandType: 'ClientList' });
+
+module.exports = almond;
