@@ -22,7 +22,7 @@ const verifyAccessToken = (req, res, next) => {
 
 app.use(verifyAccessToken);
 
-app.put('/switches', (req, res) => {
+app.get('/switches', (req, res) => {
     almond.sendAction({
         deviceName: req.query.device_name || req.body.device_name,
         action: req.query.action || req.body.action
