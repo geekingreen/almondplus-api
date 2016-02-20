@@ -28,7 +28,6 @@ app.get('/login', (req, res) => {
         db.getClient(req.query.client_id, function (err, client) {
             req.session.client = client;
             res.render('login', {
-                redirect: req.query.redirect,
                 client_id: req.query.client_id,
                 redirect_uri: req.query.redirect_uri || client.redirectUri,
                 state: req.query.state
@@ -47,7 +46,6 @@ app.post('/login', (req, res) => {
         db.getUser(username, password, (err, user) => {
             if(err || !user) {
                 res.render('login', {
-                    redirect: req.body.redirect,
                     client_id: req.body.client_id,
                     redirect_uri: req.body.redirect_uri,
                     state: req.body.state,

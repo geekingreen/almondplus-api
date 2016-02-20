@@ -1,4 +1,4 @@
-<form action='/oauth/login' method="POST">
+<form id="login" method="POST">
     <p>Username: <input name="username" type="text" /></p>
     <p>Password: <input name="password" type="password" /></p>
     <input type="hidden" name="state" value="{{state}}" />
@@ -7,3 +7,6 @@
     <input type="hidden" name="redirect_uri" value="{{redirect_uri}}" />
     <p><button>Login</button></p>
 </form>
+<script>
+    document.getElementById('login').action = location.pathname;
+</script>
