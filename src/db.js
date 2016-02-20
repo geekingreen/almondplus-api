@@ -1,6 +1,12 @@
 'use strict';
+const fs = require('fs');
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('./oauth.db');
+
+if (!fs.existsSync('./data')) {
+    fs.mkdirSync('./data');
+}
+
+const db = new sqlite3.Database('./data/oauth.db');
 const config = require('../config');
 
 const FIELD_ID = 'rowid';
