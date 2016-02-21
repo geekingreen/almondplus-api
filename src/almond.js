@@ -90,9 +90,13 @@ class Almond {
         if (message.type === 'utf8') {
             const data = JSON.parse(message.utf8Data);
             const mii = data.mii || data.MobileInternalIndex;
+
             this._sendEvent('message', data);
-            if (data.commandtype === 'devicelist') {
+            
+            switch(data.commandtype || data.CommandType) {
+            case CMD_DEVICE_LIST:
                 this._onDeviceList(data.data);
+                break;
             }
             this._resolvePromise(mii, data);
         }
@@ -142,7 +146,7 @@ class Almond {
             this.mii[mii] = Promise.defer();
             this.send({
                 mii: mii,
-                cmd: 'setdeviceindex',
+                cmd: CMD_SET_DEVICE_INDEX,
                 devid: device.deviceid,
                 index: value.index,
                 value: data.action === 'on' ? true : false
@@ -157,7 +161,7 @@ class Almond {
 const almond = new Almond(config);
 
 // Get initial device information
-almond.send({ mii: 1, cmd: 'devicelist' });
-almond.send({ MobileInternalIndex: 1, CommandType: 'ClientList' });
+almond.send({ mii: 1, cmd: CMD_DEVICE_LIST });
+almond.send({ MobileInternalIndex: 1, CommandType: CMD_CLIENT_LIST });
 
 module.exports = almond;
