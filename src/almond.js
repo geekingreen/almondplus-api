@@ -8,6 +8,7 @@ const CMD_SET_DEVICE_INDEX = 'setdeviceindex';
 const CMD_SENSOR_UPDATE = 'SensorUpdate';
 
 const SWITCH_BINARY = 'SWITCH BINARY';
+const SWITCH_MULTILEVEL = 'SWITCH MULTILEVEL';
 
 function getId() {
     if (!getId.id || getId.id > 999) {
@@ -130,26 +131,32 @@ class Almond {
     }
 
     sendAction(data) {
+        console.log(`Looking for device: ${data.deviceName}`);
+
         const mii = getId();
         const device = this._getDeviceByName(data.deviceName);
-        const value = this._getSwitchValue(device.devicevalues);
-        this.mii[mii] = Promise.defer();
-        this.send({
-            mii: mii,
-            cmd: 'setdeviceindex',
-            devid: device.deviceid,
-            index: value.index,
-            value: data.action === 'on' ? true : false
-        });
-        return this.mii[mii].promise;
+
+        if (device) {
+            console.log(`Device found: ${device.devicename}, setting value to ${data.action}`);
+            const value = this._getSwitchValue(device.devicevalues);
+            this.mii[mii] = Promise.defer();
+            this.send({
+                mii: mii,
+                cmd: 'setdeviceindex',
+                devid: device.deviceid,
+                index: value.index,
+                value: data.action === 'on' ? true : false
+            });
+            return this.mii[mii].promise;
+        } else {
+            return Promise.reject({ message: 'Device not found' });
+        }
     }
 };
 
 const almond = new Almond(config);
 
-almond.on('message', res => {
-});
-
+// Get initial device information
 almond.send({ mii: 1, cmd: 'devicelist' });
 almond.send({ MobileInternalIndex: 1, CommandType: 'ClientList' });
 
