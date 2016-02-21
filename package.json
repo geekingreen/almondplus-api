@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
+    "setup": "node setup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Isaac Gifford <isaac@geekingreen.com>",
@@ -14,6 +15,7 @@
     "express": "^4.13.4",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.13.0",
+    "inquirer": "^0.12.0",
     "jsonfile": "^2.2.3",
     "moment": "^2.11.2",
     "shortid": "^2.2.4",
