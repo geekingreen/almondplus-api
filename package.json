@@ -5,25 +5,27 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "setup": "node setup",
+    "configure": "node setup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Isaac Gifford <isaac@geekingreen.com>",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.0",
+    "crypto": "0.0.3",
     "express": "^4.13.4",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.13.0",
-    "inquirer": "^0.12.0",
-    "jsonfile": "^2.2.3",
+    "inquirer": "^1.0.0",
     "moment": "^2.11.2",
+    "oauth20-provider": "^0.6.0",
+    "querystring": "^0.2.0",
     "shortid": "^2.2.4",
     "sqlite3": "^3.1.1",
     "websocket": "^1.0.22"
   },
   "devDependencies": {
-    "babel-eslint": "^5.0.0",
-    "eslint": "^2.1.0"
+    "babel-eslint": "^6.0.2",
+    "eslint": "^2.7.0"
   }
 }

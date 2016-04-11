@@ -2,11 +2,5 @@
     "host": "10.10.10.254",
     "port": "7681",
     "password": "<almondplus password>",
-    "sessionSecret": "<session secret>",
-    "users": [
-        {
-            "username": "<username>",
-            "password": "<password>"
-        }
-    ]
+    "sessionSecret": "<session secret>"
 }

@@ -1,4 +1,5 @@
 'use strict';
+
 const WebSocketClient = require('websocket').client;
 const config = require('../config');
 
@@ -92,7 +93,7 @@ class Almond {
             const mii = data.mii || data.MobileInternalIndex;
 
             this._sendEvent('message', data);
-            
+
             switch(data.commandtype || data.CommandType) {
             case CMD_DEVICE_LIST:
                 this._onDeviceList(data.data);

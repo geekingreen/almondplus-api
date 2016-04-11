@@ -1,26 +1,9 @@
 'use strict';
-const moment = require('moment');
+
 const express = require('express');
+
 const almond = require('./almond');
-const db = require('./db');
-
 const app = express.Router();
-
-const verifyAccessToken = (req, res, next) => {
-    const accessToken = req.query.auth_token;
-    db.getAccessToken(accessToken, (err, token) => {
-        if (err || !token) {
-            return res.json({ message: 'Invalid token' });
-        }
-        if (parseInt(token.expires, 10) - moment().valueOf() > 0) {
-            next();
-        } else {
-            res.json({ message: 'Access token expired' });
-        }
-    });
-};
-
-app.use(verifyAccessToken);
 
 app.get('/switches', (req, res) => {
     almond.sendAction({
