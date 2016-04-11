@@ -3,7 +3,7 @@
 const oauth20 = require('oauth20-provider');
 
 module.exports = function (type) {
-    const oauth = new oauth20({ log: { level: 4 } });
+    const oauth = new oauth20({ log: { level: 0 } });
 
     const model = require(`./model/${type}`).oauth2;
     if (!model) {

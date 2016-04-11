@@ -23,8 +23,8 @@ const SQL_INSERT = `
 const SQL_GET_BY_CODE = `
     SELECT
         ${FIELD_CODE},
-        ${FIELD_CLIENT_ID} AS clientId,
         ${FIELD_USER_ID} AS userId,
+        ${FIELD_CLIENT_ID} AS clientId,
         ${FIELD_SCOPE},
         ${FIELD_EXPIRE}
     FROM ${TABLE}
@@ -45,13 +45,12 @@ module.exports = {
         const code = crypto.randomBytes(32).toString('hex');
         const expires = new Date().getTime() + ttl * 1000;
 
-        const stmt = db.prepare(SQL_INSERT);
-        stmt.run(code, userId, clientId, scope, expires);
-        stmt.finalize(cb);
+        db.run(SQL_INSERT, [code, userId, clientId, scope, expires],
+            () => db.get(SQL_GET_BY_CODE, code, (err, code) => cb(err, code.code)));
     },
 
     fetchByCode: (code, cb) => {
-        db.run(SQL_GET_BY_CODE, code, cb);
+        db.get(SQL_GET_BY_CODE, code, cb);
     },
 
     getUserId: code => code.userId,

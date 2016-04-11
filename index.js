@@ -1,6 +1,7 @@
 'use strict';
 
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const exphbs = require('express-handlebars');
 const express = require('express');
 const path = require('path');
@@ -25,17 +26,24 @@ app.use(session({
     saveUninitialized: false
 }));
 
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(oauth.inject());
 
 function isUserAuthorized(req, res, next) {
-    if (req.session.authorized) next();
-    else {
-        var params = req.query;
-        params.backUrl = path.join(req.baseUrl, req.path);
-        res.redirect(`/login?${query.stringify(params)}`);
-    }
+    const params = req.query;
+
+    oauth.model.client.fetchById(params.client_id, (err, client) => {
+        if (client) {
+            params.redirect_uri = client.redirectUri;
+            if (req.session.authorized) next();
+            else {
+                params.backUrl = path.join(req.baseUrl, req.path);
+                res.redirect(`/login?${query.stringify(params)}`);
+            }
+        }
+    });
 }
 
 app.get('/authorization', isUserAuthorized, oauth.controller.authorization, (req, res) => {

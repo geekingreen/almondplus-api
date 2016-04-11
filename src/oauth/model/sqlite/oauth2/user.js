@@ -11,19 +11,19 @@ const SQL_CREATE_TABLE = `
     (${FIELD_USERNAME} TEXT UNIQUE, ${FIELD_PASSWORD} TEXT)
 `;
 
-const SQL_INSERT_USER = `
+const SQL_INSERT = `
     INSERT OR IGNORE INTO ${TABLE}
     (${FIELD_USERNAME}, ${FIELD_PASSWORD})
     VALUES (?, ?)
 `;
 
 const SQL_GET_BY_ID = `
-    SELECT ${FIELD_USERNAME}, ${FIELD_PASSWORD} FROM ${TABLE}
+    SELECT rowid as id, * FROM ${TABLE}
     WHERE id = ?
 `;
 
 const SQL_GET_BY_USERNAME = `
-    SELECT * FROM ${TABLE}
+    SELECT rowid as id, * FROM ${TABLE}
     WHERE ${FIELD_USERNAME} = ?
 `;
 
@@ -49,11 +49,11 @@ module.exports = {
     getId: user => user.id,
 
     fetchById: (id, cb) => {
-        db.run(SQL_GET_BY_ID, id, cb);
+        db.get(SQL_GET_BY_ID, id, cb);
     },
 
     fetchByUsername: (username, cb) => {
-        db.run(SQL_GET_BY_USERNAME, username, cb);
+        db.get(SQL_GET_BY_USERNAME, username, cb);
     },
 
     checkPassword: (user, password, cb) => {
@@ -63,7 +63,7 @@ module.exports = {
     fetchFromRequest: req => req.session.user,
 
     create: (username, password, cb) => {
-        const stmt = db.prepare(SQL_INSERT_USER);
+        const stmt = db.prepare(SQL_INSERT);
         stmt.run(username, password);
         stmt.finalize(cb);
     },

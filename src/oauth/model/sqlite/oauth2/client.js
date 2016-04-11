@@ -32,9 +32,9 @@ const SQL_GET_BY_ID = `
 const SQL_UPDATE_BY_NAME = `
     UPDATE ${TABLE}
     SET
-    ${FIELD_CLIENT_ID} = ?,
+    ${FIELD_CLIENT_ID} as clientId = ?,
     ${FIELD_SECRET} = ?,
-    ${FIELD_REDIRECT} = ?
+    ${FIELD_REDIRECT} as redirectUri = ?
     WHERE ${FIELD_NAME} = ?
 `;
 

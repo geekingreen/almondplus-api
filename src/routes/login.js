@@ -2,20 +2,20 @@
 
 const express = require('express');
 const query = require('querystring');
-const path = require('path');
 
 const app = express.Router();
 const model = require('../oauth/model/sqlite');
 
 app.get('/', (req, res) => {
-    res.render('login', { path: path.join(req.baseUrl, req.path) });
+    res.render('login');
 });
 
 app.post('/', (req, res, next) => {
-    const backUrl = req.query.backUrl || '/';
-    delete(req.query.backUrl);
+    const params = req.query;
+    var backUrl = params.backUrl || '/';
+    delete(params.backUrl);
     backUrl += backUrl.indexOf('?') > -1 ? '&' : '?';
-    backUrl += query.stringify(req.query);
+    backUrl += query.stringify(params);
 
     if (req.session.authorized) res.redirect(backUrl);
     else if (req.body.username && req.body.password) {

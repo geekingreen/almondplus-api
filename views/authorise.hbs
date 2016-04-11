@@ -1,9 +1,6 @@
-<form action="/oauth/authorise?state={{state}}" method="POST">
-    <h1>Authorise this app? {{client_id}}</h1>
-    <input type="hidden" name="client_id" value="{{client_id}}" />
-    <input type="hidden" name="redirect_uri" value="{{redirect_uri}}" />
-    <input type="hidden" name="response_type" value="code" />
-    <input type="radio" name="allow" value="yes" checked="checked" /> Yes
-    <input type="radio" name="allow" value="no" /> No
+<form method="POST">
+    <h1>Authorise this app? {{client.name}}</h1>
+    <input type="radio" name="decision" value="1" checked="checked" /> Yes
+    <input type="radio" name="decision" value="0" /> No
     <button>Submit</button>
 </form>
