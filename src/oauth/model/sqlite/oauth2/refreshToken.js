@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('crypto');
+
 const db = require('../db');
 
 const TABLE = 'refresh_tokens';
@@ -76,6 +78,6 @@ module.exports = {
 
         const stmt = db.prepare(SQL_INSERT);
         stmt.run(token, userId, clientId, scope);
-        stmt.finalize(cb);
+        stmt.finalize((err) => err ? cb(err) : cb(null, token));
     }
 };

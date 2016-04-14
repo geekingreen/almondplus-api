@@ -40,20 +40,19 @@ function isUserAuthorized(req, res, next) {
             if (req.session.authorized) next();
             else {
                 params.backUrl = path.join(req.baseUrl, req.path);
-                res.redirect(`/login?${query.stringify(params)}`);
+                res.redirect(`/oauth/login?${query.stringify(params)}`);
             }
         }
     });
 }
 
-app.get('/authorization', isUserAuthorized, oauth.controller.authorization, (req, res) => {
+app.get('/oauth/authorization', isUserAuthorized, oauth.controller.authorization, (req, res) => {
     res.render('authorise');
 });
-app.post('/authorization', isUserAuthorized, oauth.controller.authorization);
+app.post('/oauth/authorization', isUserAuthorized, oauth.controller.authorization);
+app.post('/oauth/token', oauth.controller.token);
+app.use('/oauth/login', login);
 
-app.post('/token', oauth.controller.token);
-
-app.use('/login', login);
 app.use('/api', oauth.middleware.bearer, api);
 
 app.listen(3000);

@@ -52,9 +52,9 @@ module.exports = {
         const token = crypto.randomBytes(64).toString('hex');
         const expires = new Date().getTime() + ttl * 1000;
 
-        const stmt = this.db.prepare(SQL_INSERT);
+        const stmt = db.prepare(SQL_INSERT);
         stmt.run(token, clientId, userId, scope, expires);
-        stmt.finalize(cb);
+        stmt.finalize((err) => err ? cb(err) : cb(null, token));
     },
 
     fetchByToken: (token, cb) => {
@@ -67,5 +67,7 @@ module.exports = {
 
     getTTL: accessToken => accessToken.expires,
 
-    checkTTL: accessToken => accessToken.expires > new Date().getTime()
+    checkTTL: accessToken => accessToken.expires > new Date().getTime(),
+
+    ttl: 30 * 24 * 60 * 60 // days, hours, mins, secs
 };

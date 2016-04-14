@@ -43,7 +43,7 @@ db.serialize(() => {
 });
 
 module.exports = {
-    getId: client => client.client_id,
+    getId: client => client.clientId,
 
     getRedirectUri: client => client.redirectUri,
 

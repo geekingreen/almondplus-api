@@ -48,7 +48,7 @@ module.exports = function (type) {
     oauth.model.code.getUserId = model.code.getUserId;
     oauth.model.code.getClientId = model.code.getClientId;
     oauth.model.code.getScope = model.code.getScope;
-    oauth.model.code.checkTTL = model.code.getScope;
+    oauth.model.code.checkTTL = model.code.checkTTL;
 
     // Decision controller
     oauth.decision = function(req, res, client, scope, user) {
