@@ -57,20 +57,34 @@ class Almond {
     }
 
     _onDeviceList(devices) {
-        this.devices = devices;
+        this.devices = Object.keys(devices)
+            .map(id => {
+                const device = devices[id];
+                return {
+                    applianceId: id,
+                    manufacturerName: 'NA',
+                    modelName: device.friendlydevicetype,
+                    version: Object.keys(device.devicevalues)
+                        .reduce((p, c) => {
+                            return (/binary/i).test(device.devicevalues[c].name) ? c : p;
+                        }, '0'),
+                    friendlyName: device.devicename,
+                    friendlyDescription: device.devicename,
+                    isReachable: (/binary/i).test(device.friendlydevicetype),
+                    actions: [
+                        'turnOn',
+                        'turnOff'
+                    ],
+                    additionalApplianceDetails: {
+                    }
+                };
+            });
         Object.keys(devices).forEach(id => console.log(`Found device: ${devices[id].devicename}`));
     }
 
-    _getDeviceByName(name) {
-        for (var id in this.devices) {
-            const device = this.devices[id];
-            if (device.devicename.toLowerCase() === name) {
-                return device;
-            }
-        }
-    }
+    _getSwitchValue(id) {
+        const devicevalues = this.devices[id].devicevalues;
 
-    _getSwitchValue(devicevalues) {
         for (var id in devicevalues) {
             const v = devicevalues[id];
             if (v.name === SWITCH_BINARY) {
@@ -136,26 +150,22 @@ class Almond {
     }
 
     sendAction(data) {
-        console.log(`Looking for device: ${data.deviceName}`);
 
         const mii = getId();
-        const device = this._getDeviceByName(data.deviceName);
 
-        if (device) {
-            console.log(`Device found: ${device.devicename}, setting value to ${data.action}`);
-            const value = this._getSwitchValue(device.devicevalues);
-            this.mii[mii] = Promise.defer();
-            this.send({
-                mii: mii,
-                cmd: CMD_SET_DEVICE_INDEX,
-                devid: device.deviceid,
-                index: value.index,
-                value: data.action === 'on' ? true : false
-            });
-            return this.mii[mii].promise;
-        } else {
-            return Promise.reject({ message: 'Device not found' });
-        }
+        this.mii[mii] = Promise.defer();
+        this.send({
+            mii: mii,
+            cmd: CMD_SET_DEVICE_INDEX,
+            devid: data.applianceId,
+            index: value.index,
+            value: data.action === 'on' ? true : false
+        });
+        return this.mii[mii].promise;
+    }
+
+    getDevices() {
+        return this.devices;
     }
 };
 
