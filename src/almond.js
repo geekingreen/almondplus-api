@@ -61,36 +61,31 @@ class Almond {
             .map(id => {
                 const device = devices[id];
                 return {
-                    applianceId: id,
-                    manufacturerName: 'NA',
-                    modelName: device.friendlydevicetype,
-                    version: Object.keys(device.devicevalues)
-                        .reduce((p, c) => {
-                            return (/binary/i).test(device.devicevalues[c].name) ? c : p;
-                        }, '0'),
-                    friendlyName: device.devicename,
-                    friendlyDescription: device.devicename,
-                    isReachable: (/binary/i).test(device.friendlydevicetype),
                     actions: [
                         'turnOn',
                         'turnOff'
                     ],
                     additionalApplianceDetails: {
-                    }
+                    },
+                    applianceId: id,
+                    friendlyDescription: device.friendlydevicetype,
+                    friendlyName: device.devicename,
+                    isReachable: true,
+                    manufacturerName: 'NA',
+                    modelName: device.friendlydevicetype,
+                    version: Object.keys(device.devicevalues)
+                        .reduce((p, c) => {
+                            return (/switch binary/i).test(device.devicevalues[c].name) ? c : p;
+                        }, '0'),
                 };
             });
         Object.keys(devices).forEach(id => console.log(`Found device: ${devices[id].devicename}`));
     }
 
-    _getSwitchValue(id) {
-        const devicevalues = this.devices[id].devicevalues;
+    _getSwitchIndex(id) {
+        const device = this.devices.find(d => d.applianceId === id);
 
-        for (var id in devicevalues) {
-            const v = devicevalues[id];
-            if (v.name === SWITCH_BINARY) {
-                return v;
-            }
-        }
+        return device ? device.version : 0;
     }
 
     _resolvePromise(mii, data) {
@@ -152,13 +147,14 @@ class Almond {
     sendAction(data) {
 
         const mii = getId();
+        const index = this._getSwitchIndex(data.applianceId);
 
         this.mii[mii] = Promise.defer();
         this.send({
             mii: mii,
             cmd: CMD_SET_DEVICE_INDEX,
             devid: data.applianceId,
-            index: value.index,
+            index: index,
             value: data.action === 'on' ? true : false
         });
         return this.mii[mii].promise;
