@@ -68,7 +68,7 @@ module.exports = {
     getTTL: accessToken => {
         const ttl = moment(accessToken.expires).diff(new Dat(), 'seconds');
         return cb(null, ttl > 0 ? ttl : 0);
-    }
+    },
 
     checkTTL: accessToken => accessToken.expires > new Date().getTime(),
 
