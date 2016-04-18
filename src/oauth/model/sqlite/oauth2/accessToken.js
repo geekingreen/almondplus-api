@@ -65,7 +65,10 @@ module.exports = {
         db.get(SQL_GET_BY_USER_ID_CLIENT_ID, userId, clientId, cb);
     },
 
-    getTTL: accessToken => accessToken.expires,
+    getTTL: accessToken => {
+        const ttl = moment(accessToken.expires).diff(new Dat(), 'seconds');
+        return cb(null, ttl > 0 ? ttl : 0);
+    }
 
     checkTTL: accessToken => accessToken.expires > new Date().getTime(),
 

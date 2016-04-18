@@ -18,7 +18,7 @@
     "express-handlebars": "^3.0.0",
     "express-session": "^1.13.0",
     "inquirer": "^1.0.0",
-    "moment": "^2.11.2",
+    "moment": "^2.12.0",
     "oauth20-provider": "^0.6.0",
     "querystring": "^0.2.0",
     "shortid": "^2.2.4",

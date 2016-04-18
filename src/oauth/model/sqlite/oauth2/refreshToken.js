@@ -56,9 +56,7 @@ module.exports = {
     getScope: refreshToken => refreshToken.scope,
 
     fetchByToken: (token, cb) => {
-        const stmt = db.prepare(SQL_GET_BY_TOKEN);
-        stmt.run(token);
-        stmt.finalize(cb);
+        db.get(SQL_GET_BY_TOKEN, token, cb);
     },
 
     removeByUserIdClientId: (userId, clientId, cb) => {
@@ -78,6 +76,6 @@ module.exports = {
 
         const stmt = db.prepare(SQL_INSERT);
         stmt.run(token, userId, clientId, scope);
-        stmt.finalize((err) => err ? cb(err) : cb(null, token));
+        stmt.finalize(err => cb(err, token));
     }
 };
