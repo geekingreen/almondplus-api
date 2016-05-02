@@ -40,6 +40,7 @@ module.exports = function (type) {
     oauth.model.accessToken.getTTL = model.accessToken.getTTL;
     oauth.model.accessToken.fetchByUserIdClientId = model.accessToken.fetchByUserIdClientId;
     oauth.model.accessToken.create = model.accessToken.create;
+    oauth.model.accessToken.ttl = model.accessToken.ttl;
 
     // Code
     oauth.model.code.create = model.code.create;
