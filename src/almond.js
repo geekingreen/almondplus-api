@@ -56,22 +56,69 @@ class Almond {
         }
     }
 
+    _getDeviceActions(device) {
+        const actions = [];
+
+        switch(device.devicetype) {
+        case '1':
+            actions.push(
+                'turnOn',
+                'turnOff'
+            );
+            break;
+        case '2':
+        case '4':
+            actions.push(
+                'turnOn',
+                'turnOff',
+                'setPercentage',
+                'incrementPercentage',
+                'decrementPercentage'
+            );
+            break;
+        case '7':
+            actions.push(
+                'setTargetTemperature',
+                'incrementTargetTemperature',
+                'decrementTargetTemperature'
+            );
+        }
+        return actions;
+    }
+
+    _getApplianceDetails(device) {
+        const obj = {};
+
+        if (device.devicetype === '2') {
+            obj.maxValue = 100;
+        } else if (device.devicetype === '4') {
+            obj.maxValue = 254;
+        }
+
+        Object.keys(device.devicevalues).forEach((v) => {
+            const value = device.devicevalues[v];
+            if (value.name === SWITCH_BINARY) {
+                obj.binaryIndex = value.index;
+            } else if (value.name === SWITCH_MULTILEVEL) {
+                obj.multiIndex = value.index;
+            }
+        });
+
+        return obj;
+    }
+
     _onDeviceList(devices) {
         this.devices = Object.keys(devices)
             .map(id => {
                 const device = devices[id];
                 return {
-                    actions: [
-                        'turnOn',
-                        'turnOff'
-                    ],
-                    additionalApplianceDetails: {
-                    },
+                    actions: this._getDeviceActions(device),
+                    additionalApplianceDetails: this._getApplianceDetails(device),
                     applianceId: id,
                     friendlyDescription: device.friendlydevicetype,
                     friendlyName: device.devicename,
                     isReachable: true,
-                    manufacturerName: 'NA',
+                    manufacturerName: 'Almond Plus',
                     modelName: device.friendlydevicetype,
                     version: Object.keys(device.devicevalues)
                         .reduce((p, c) => {
@@ -80,12 +127,6 @@ class Almond {
                 };
             });
         Object.keys(devices).forEach(id => console.log(`Found device: ${devices[id].devicename}`));
-    }
-
-    _getSwitchIndex(id) {
-        const device = this.devices.find(d => d.applianceId === id);
-
-        return device ? device.version : 0;
     }
 
     _resolvePromise(mii, data) {
@@ -147,15 +188,14 @@ class Almond {
     sendAction(data) {
 
         const mii = getId();
-        const index = this._getSwitchIndex(data.applianceId);
 
         this.mii[mii] = Promise.defer();
         this.send({
             mii: mii,
             cmd: CMD_SET_DEVICE_INDEX,
             devid: data.applianceId,
-            index: index,
-            value: data.action === 'on' ? true : false
+            index: data.index,
+            value: data.value
         });
         return this.mii[mii].promise;
     }

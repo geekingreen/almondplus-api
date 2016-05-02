@@ -9,11 +9,16 @@ app.get('/switches', (req, res) => {
     res.json(almond.getDevices());
 });
 
-app.get('/switches/:applianceId/:action', (req, res) => {
+app.get('/switches/:applianceId/:index/:value', (req, res) => {
+    const applianceId = req.params.applianceId;
+    const index = req.params.index;
+    const value = req.params.value;
+
     if (/on|off/.test(req.params.action)) {
         almond.sendAction({
-            applianceId: req.params.applianceId,
-            action: req.params.action
+            applianceId: applianceId,
+            index: index,
+            value: value
         }).then(data => {
             res.json({ success: true });
         }, res.status(500).json({ message: 'Invalid action' }));
