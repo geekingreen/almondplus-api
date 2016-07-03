@@ -14,17 +14,13 @@ app.get('/switches/:applianceId/:index/:value', (req, res) => {
     const index = req.params.index;
     const value = req.params.value;
 
-    if (/on|off/.test(req.params.action)) {
-        almond.sendAction({
-            applianceId: applianceId,
-            index: index,
-            value: value
-        }).then(data => {
-            res.json({ success: true });
-        }, res.status(500).json({ message: 'Invalid action' }));
-    } else {
-        res.status(500).json({ message: 'Invalid action' });
-    }
+    almond.sendAction({
+        applianceId: applianceId,
+        index: index,
+        value: value
+    }).then(data => {
+        res.json({ success: true });
+    }, res.status(500).json({ message: 'Invalid action' }));
 });
 
 module.exports = app;
