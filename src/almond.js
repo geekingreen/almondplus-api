@@ -3,9 +3,9 @@
 const WebSocketClient = require('websocket').client;
 const config = require('../config');
 
-const CMD_DEVICE_LIST = 'devicelist';
+const CMD_DEVICE_LIST = 'DeviceList';
 const CMD_CLIENT_LIST = 'ClientList';
-const CMD_SET_DEVICE_INDEX = 'setdeviceindex';
+const CMD_SET_DEVICE_INDEX = 'UpdateDeviceIndex';
 const CMD_SENSOR_UPDATE = 'SensorUpdate';
 
 const SWITCH_BINARY = 'SWITCH BINARY';
@@ -95,12 +95,12 @@ class Almond {
             obj.maxValue = 254;
         }
 
-        Object.keys(device.devicevalues).forEach((v) => {
-            const value = device.devicevalues[v];
-            if (value.name === SWITCH_BINARY) {
-                obj.binaryIndex = value.index;
-            } else if (value.name === SWITCH_MULTILEVEL) {
-                obj.multiIndex = value.index;
+        Object.keys(device.DeviceValues).forEach((v, i) => {
+            const value = device.DeviceValues[v];
+            if (value.Name === SWITCH_BINARY) {
+                obj.binaryIndex = i;
+            } else if (value.Name === SWITCH_MULTILEVEL) {
+                obj.multiIndex = i;
             }
         });
 
@@ -115,18 +115,18 @@ class Almond {
                     actions: this._getDeviceActions(device),
                     additionalApplianceDetails: this._getApplianceDetails(device),
                     applianceId: id,
-                    friendlyDescription: device.friendlydevicetype,
-                    friendlyName: device.devicename,
+                    friendlyDescription: device.Data.FriendlyDeviceType,
+                    friendlyName: device.Data.Name,
                     isReachable: true,
                     manufacturerName: 'Almond Plus',
-                    modelName: device.friendlydevicetype,
-                    version: Object.keys(device.devicevalues)
+                    modelName: device.Data.FriendlyDeviceType,
+                    version: Object.keys(device.DeviceValues)
                         .reduce((p, c) => {
-                            return (/switch binary/i).test(device.devicevalues[c].name) ? c : p;
+                            return (/switch binary/i).test(device.DeviceValues[c].Name) ? c : p;
                         }, '0'),
                 };
             });
-        Object.keys(devices).forEach(id => console.log(`Found device: ${devices[id].devicename}`));
+        Object.keys(devices).forEach(id => console.log(`Found device: ${devices[id].Data.Name}`));
     }
 
     _resolvePromise(mii, data) {
@@ -140,13 +140,13 @@ class Almond {
     _handleMessage(message) {
         if (message.type === 'utf8') {
             const data = JSON.parse(message.utf8Data);
-            const mii = data.mii || data.MobileInternalIndex;
+            const mii = data.MobileInternalIndex;
 
             this._sendEvent('message', data);
 
-            switch(data.commandtype || data.CommandType) {
+            switch(data.CommandType) {
             case CMD_DEVICE_LIST:
-                this._onDeviceList(data.data);
+                this._onDeviceList(data.Devices);
                 break;
             }
             this._resolvePromise(mii, data);
@@ -187,15 +187,16 @@ class Almond {
 
     sendAction(data) {
 
+        console.log(data)
         const mii = getId();
 
         this.mii[mii] = Promise.defer();
         this.send({
-            mii: mii,
-            cmd: CMD_SET_DEVICE_INDEX,
-            devid: data.applianceId,
-            index: data.index,
-            value: data.value
+            MobileInternalIndex: mii,
+            CommandType: CMD_SET_DEVICE_INDEX,
+            ID: data.applianceId,
+            Index: data.index,
+            Value: data.value
         });
         return this.mii[mii].promise;
     }
@@ -208,7 +209,7 @@ class Almond {
 const almond = new Almond(config);
 
 // Get initial device information
-almond.send({ mii: 1, cmd: CMD_DEVICE_LIST });
+almond.send({ MobileInternalIndex: 1, CommandType: CMD_DEVICE_LIST });
 almond.send({ MobileInternalIndex: 1, CommandType: CMD_CLIENT_LIST });
 
 module.exports = almond;
